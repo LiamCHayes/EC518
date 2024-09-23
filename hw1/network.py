@@ -13,14 +13,17 @@ class ClassificationNetwork(torch.nn.Module):
         self.model = torch.nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=5, stride=2),
                 nn.BatchNorm2d(32),
-                nn.ReLU(),
+                nn.Dropout(p=0.25),
+                nn.Sigmoid(),
                 nn.Conv2d(32, 32, kernel_size=5, stride=2),
+                nn.Dropout(p=0.25),
+                nn.Sigmoid(),
                 nn.BatchNorm2d(32),
-                nn.ReLU(),
                 nn.Flatten(),
                 nn.Linear(140448, 2048),
-                nn.LeakyReLU(negative_slope=0.2),
-                nn.Linear(2048, 9),
+                nn.Dropout(p=0.25),
+                nn.Sigmoid(),
+                nn.Linear(2048, 4),
                 nn.Softmax(dim=1)
                 ).to(self.gpu)
 
@@ -45,25 +48,25 @@ class ClassificationNetwork(torch.nn.Module):
         actions:        python list of N torch.Tensors of size 3
         return          python list of N torch.Tensors of size C
         """
-        action_class = torch.from_numpy(np.zeros(shape=(actions.size(dim=0), 9)))
+        action_class = torch.from_numpy(np.zeros(shape=(actions.size(dim=0), 4)))
         for r in range(actions.size(dim=0)): 
-            # Test if accelerating, none, or break
+            # Gas
             if actions[r][1].item() > 0:
-                i = 0
-            elif actions[r][2].item() > 0:
-                i = 3
+                action_class[r][0] = 1
             else:
-                i = 6
-        
-            # Test if straight, left, or right
-            if actions[r][0].item() < -0.02: # Left
-                i = i
-            if actions[r][0].item() > 0.02:
-                i = i+1
+                action_class[r][0] = 0
+
+            # Brake
+            if actions[r][2].item() > 0:
+                action_class[r][1] = 1
             else:
-                i = i+2
+                action_class[r][1] = 0
             
-            action_class[r][i] = 1    
+            # Steer
+            if actions[r][0].item() < -0.01: # Left
+                action_class[r][2] = 1
+            if actions[r][0].item() > 0.01:
+                action_class[r][2] = 0
 
         action_class = action_class.type(torch.FloatTensor)
         return action_class.to(self.gpu)

@@ -10,7 +10,7 @@ from PIL import Image
 class CarlaDataset(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
-        self.data_list = glob.glob(data_dir+'*.jpg') #need to change to your data format
+        self.data_list = glob.glob(data_dir+'rgb_*.jpg') #need to change to your data format
         
         self.transform = transforms.Compose([
                     transforms.ToTensor(),

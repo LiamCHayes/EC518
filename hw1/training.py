@@ -35,7 +35,7 @@ def train(data_folder, save_path):
             batch_gt = infer_action.actions_to_classes(batch_gt) 
 
             batch_out = infer_action(batch_in)
-            loss = cross_entropy_loss(batch_out, batch_gt)
+            loss = MSE_loss(batch_out, batch_gt)
 
             optimizer.zero_grad()
             loss.backward()
@@ -56,7 +56,7 @@ def train(data_folder, save_path):
     plt.show()
 
 
-def cross_entropy_loss(batch_out, batch_gt):
+def MSE_loss(batch_out, batch_gt):
     """
     Calculates the cross entropy loss between the prediction of the network and
     the ground truth class for one batch.
@@ -65,8 +65,13 @@ def cross_entropy_loss(batch_out, batch_gt):
     batch_gt:       torch.Tensor of size (batch_size, C) True values
     return          float
     """
-    loss = -torch.mul(batch_gt, torch.log(batch_out + 0.01))
-    loss = loss.sum()
+    gpu = torch.device('cuda')
+
+    weight = torch.Tensor([[1, 4, 64*4, 64*4]]).to(gpu)
+    e_sq = (batch_out - batch_gt) * (batch_out - batch_gt)
+    e_sq = torch.mul(e_sq, weight)
+    e_sq_sum = e_sq.sum()
+    loss = e_sq_sum / (e_sq.size(dim=0) * e_sq.size(dim=1)) 
     return loss
 
 
