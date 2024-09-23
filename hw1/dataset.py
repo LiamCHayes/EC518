@@ -10,14 +10,15 @@ from PIL import Image
 class CarlaDataset(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
-        self.data_list = glob.glob(data_dir+'*.jpg') #need to change to your data format
+        self.data_list_rgb = glob.glob(data_dir+'rgb_*.jpg') 
+        self.data_list_depth = glob.glob(data_dir+'depth_*.jpg')
         
         self.transform = transforms.Compose([
                     transforms.ToTensor(),
                     ])
 
     def __len__(self):
-        return len(self.data_list)
+        return len(self.data_list_rgb)
 
     def __getitem__(self, idx):
         """
@@ -27,14 +28,21 @@ class CarlaDataset(Dataset):
         return    (image, action), both in torch.Tensor format
         """
         # Get image
-        image = Image.open(self.data_list[idx])
+        image = Image.open(self.data_list_rgb[idx])
         RGB_tensor = self.transform(image)
+
+        # Get depth image
+        image = Image.open(self.data_list_depth[idx])
+        Depth_tensor = self.transform(image)
+
+        # Concatenate images
+        input_tensor = torch.cat([RGB_tensor, Depth_tensor], dim=0)
 
         # Get action 
         controls = np.load(self.data_dir+'controls_trim.npy')
         action = torch.from_numpy(controls[idx,:])
 
-        return (RGB_tensor, action)
+        return (input_tensor, action)
 
 
 def get_dataloader(data_dir, batch_size, num_workers=4, shuffle=True):

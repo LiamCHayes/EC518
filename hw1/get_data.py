@@ -72,6 +72,8 @@ ego_cam.listen(lambda image: image.save_to_disk(f'output/{args.label}/rgb_%.6d.j
 # Front facing depth camera
 depth_cam = None
 depth_bp = world.get_blueprint_library().find('sensor.camera.depth')
+depth_bp.set_attribute('image_size_x',str(320))
+depth_bp.set_attribute('image_size_y',str(240))
 depth_location = carla.Location(2,0,3) # On the front hood
 depth_rotation = carla.Rotation(0,0,0) # Front facing
 depth_transform = carla.Transform(depth_location,depth_rotation)
