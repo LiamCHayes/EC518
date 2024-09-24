@@ -30,11 +30,18 @@ class CarlaDataset(Dataset):
         image = Image.open(self.data_list[idx])
         RGB_tensor = self.transform(image)
 
+        # Get previous 3 images and concatenate
+        image_1 = self.transform(Image.open(self.data_list[idx-1]))
+        image_2 = self.transform(Image.open(self.data_list[idx-2]))
+        image_3 = self.transform(Image.open(self.data_list[idx-3]))
+        input_tensor = torch.cat([RGB_tensor, image_1, image_2, image_3], dim=0)
+
+
         # Get action 
         controls = np.load(self.data_dir+'controls_trim.npy')
         action = torch.from_numpy(controls[idx,:])
 
-        return (RGB_tensor, action)
+        return (input_tensor, action)
 
 
 def get_dataloader(data_dir, batch_size, num_workers=4, shuffle=True):
