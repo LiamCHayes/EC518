@@ -5,7 +5,7 @@ import argparse
 
 import torch
 
-from network import ClassificationNetwork
+from network import RegressionNetwork 
 from dataset import get_dataloader
 import matplotlib.pyplot as plt
 
@@ -13,13 +13,12 @@ def train(data_folder, save_path):
     """
     Function for training the network. You can make changes (e.g., add validation dataloader, change batch_size and #of epoch) accordingly.
     """
-    infer_action = ClassificationNetwork()
+    infer_action = RegressionNetwork()
     optimizer = torch.optim.Adam(infer_action.parameters(), lr=1e-2)
     gpu = torch.device('cuda')
 
-    nr_epochs = 100
-    batch_size = 64
-    nr_of_classes = 9  # needs to be changed
+    nr_epochs = 20
+    batch_size = 64/2
     start_time = time.time()
 
     train_loader = get_dataloader(data_folder, batch_size)
@@ -32,7 +31,6 @@ def train(data_folder, save_path):
 
         for batch_idx, batch in enumerate(train_loader):
             batch_in, batch_gt = batch[0].to(gpu), batch[1].to(gpu)
-            batch_gt = infer_action.actions_to_classes(batch_gt) 
 
             batch_out = infer_action(batch_in)
             loss = MSE_loss(batch_out, batch_gt)
@@ -53,6 +51,7 @@ def train(data_folder, save_path):
     # Plot loss
     fig, ax = plt.subplots()
     ax.plot(range(nr_epochs), loss_per_epoch)
+    plt.savefig('./output/regression.png')
     plt.show()
 
 
@@ -67,9 +66,7 @@ def MSE_loss(batch_out, batch_gt):
     """
     gpu = torch.device('cuda')
 
-    weight = torch.Tensor([[1, 4, 64*4, 64*4]]).to(gpu)
     e_sq = (batch_out - batch_gt) * (batch_out - batch_gt)
-    e_sq = torch.mul(e_sq, weight)
     e_sq_sum = e_sq.sum()
     loss = e_sq_sum / (e_sq.size(dim=0) * e_sq.size(dim=1)) 
     return loss
