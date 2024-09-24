@@ -18,7 +18,7 @@ def train(data_folder, save_path):
     gpu = torch.device('cuda')
 
     nr_epochs = 20
-    batch_size = 64/2
+    batch_size = 32 
     start_time = time.time()
 
     train_loader = get_dataloader(data_folder, batch_size)
@@ -51,7 +51,7 @@ def train(data_folder, save_path):
     # Plot loss
     fig, ax = plt.subplots()
     ax.plot(range(nr_epochs), loss_per_epoch)
-    plt.savefig('./output/regression.png')
+    plt.savefig('./output/data_aug.png')
     plt.show()
 
 

@@ -30,6 +30,13 @@ class CarlaDataset(Dataset):
         image = Image.open(self.data_list[idx])
         RGB_tensor = self.transform(image)
 
+        # Rotate image by a random theta
+        theta = np.random.uniform(-10, 10)
+        RGB_tensor = transforms.functional.rotate(RGB_tensor, theta)
+
+        # Change brightness, contrast, and saturation randomly
+        RGB_tensor = transforms.ColorJitter(0.5, 0.5, 0.5, 0.25).forward(RGB_tensor)
+
         # Get action 
         controls = np.load(self.data_dir+'controls_trim.npy')
         action = torch.from_numpy(controls[idx,:])
