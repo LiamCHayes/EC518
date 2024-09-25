@@ -51,7 +51,7 @@ def train(data_folder, save_path):
     # Plot loss
     fig, ax = plt.subplots()
     ax.plot(range(nr_epochs), loss_per_epoch)
-    plt.savefig('./output/fine_tune.png')
+    plt.savefig('./output/fine_tuning.png')
     plt.show()
 
 
