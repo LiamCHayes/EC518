@@ -21,7 +21,7 @@ class RegressionNetwork(torch.nn.Module):
                 nn.Sigmoid(),
                 nn.BatchNorm2d(32),
                 nn.Flatten(),
-                nn.Linear(140448, 2048),
+                nn.Linear(31968, 2048),
                 nn.Dropout(p=0.25),
                 nn.Sigmoid(),
                 nn.Linear(2048, 2048),
