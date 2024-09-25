@@ -14,11 +14,11 @@ def train(data_folder, save_path):
     Function for training the network. You can make changes (e.g., add validation dataloader, change batch_size and #of epoch) accordingly.
     """
     infer_action = RegressionNetwork()
-    optimizer = torch.optim.Adam(infer_action.parameters(), lr=1e-2)
+    optimizer = torch.optim.SGD(infer_action.parameters(), lr=1e-4)
     gpu = torch.device('cuda')
 
     nr_epochs = 20
-    batch_size = 64/2
+    batch_size = 32 
     start_time = time.time()
 
     train_loader = get_dataloader(data_folder, batch_size)
@@ -51,7 +51,7 @@ def train(data_folder, save_path):
     # Plot loss
     fig, ax = plt.subplots()
     ax.plot(range(nr_epochs), loss_per_epoch)
-    plt.savefig('./output/regression.png')
+    plt.savefig('./output/fine_tune.png')
     plt.show()
 
 
