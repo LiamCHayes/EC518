@@ -12,10 +12,8 @@ class ClassificationNetwork(torch.nn.Module):
         self.gpu = torch.device('cuda')
         self.model = torch.nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=5, stride=2),
-                nn.BatchNorm2d(32),
                 nn.ReLU(),
                 nn.Conv2d(32, 32, kernel_size=5, stride=2),
-                nn.BatchNorm2d(32),
                 nn.ReLU(),
                 nn.Flatten(),
                 nn.Linear(140448, 2048),

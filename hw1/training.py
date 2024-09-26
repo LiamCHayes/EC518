@@ -14,7 +14,7 @@ def train(data_folder, save_path):
     Function for training the network. You can make changes (e.g., add validation dataloader, change batch_size and #of epoch) accordingly.
     """
     infer_action = ClassificationNetwork()
-    optimizer = torch.optim.Adam(infer_action.parameters(), lr=1e-2)
+    optimizer = torch.optim.Adam(infer_action.parameters(), lr=1e-4)
     gpu = torch.device('cuda')
 
     nr_epochs = 100
@@ -53,6 +53,7 @@ def train(data_folder, save_path):
     # Plot loss
     fig, ax = plt.subplots()
     ax.plot(range(nr_epochs), loss_per_epoch)
+    plt.savefig('./output/run01.png')
     plt.show()
 
 
