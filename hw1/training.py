@@ -68,7 +68,7 @@ def train(data_folder, save_path):
     fig, ax = plt.subplots()
     ax.plot(range(nr_epochs), loss_per_epoch, color='r')
     ax.plot(range(nr_epochs), valid_loss, color='g')
-    plt.savefig('./output/dagger01.png')
+    plt.savefig('./output/dagger02.png')
     plt.show()
 
 
