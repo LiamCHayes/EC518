@@ -17,7 +17,7 @@ def train(data_folder, save_path):
     optimizer = torch.optim.Adam(infer_action.parameters(), lr=1e-4)
     gpu = torch.device('cuda')
 
-    nr_epochs = 20
+    nr_epochs = 5
     batch_size = 32
     start_time = time.time()
 
