@@ -5,7 +5,7 @@ import argparse
 
 import torch
 
-from network import ClassificationNetwork
+from network import DaggerNetwork 
 from dataset import get_dataloader
 import matplotlib.pyplot as plt
 
@@ -13,18 +13,19 @@ def train(data_folder, save_path):
     """
     Function for training the network. You can make changes (e.g., add validation dataloader, change batch_size and #of epoch) accordingly.
     """
-    infer_action = ClassificationNetwork()
+    infer_action = DaggerNetwork()
     optimizer = torch.optim.Adam(infer_action.parameters(), lr=1e-4)
     gpu = torch.device('cuda')
 
-    nr_epochs = 100
-    batch_size = 64
-    nr_of_classes = 9  # needs to be changed
+    nr_epochs = 20
+    batch_size = 32
     start_time = time.time()
 
     train_loader = get_dataloader(data_folder, batch_size)
+    test_loader = get_dataloader(data_folder+'test/', batch_size)
 
     loss_per_epoch = np.empty(nr_epochs)
+    valid_loss = np.empty(nr_epochs)
     for epoch in range(nr_epochs):
         total_loss = 0
         batch_in = []
@@ -32,10 +33,13 @@ def train(data_folder, save_path):
 
         for batch_idx, batch in enumerate(train_loader):
             batch_in, batch_gt = batch[0].to(gpu), batch[1].to(gpu)
-            batch_gt = infer_action.actions_to_classes(batch_gt) 
 
             batch_out = infer_action(batch_in)
-            loss = cross_entropy_loss(batch_out, batch_gt)
+            loss = mae(batch_out, batch_gt)
+            if epoch == 10 and batch_idx == 0:
+                print(batch_gt[:5])
+                print(batch_out[:5])
+                input('press enter...')
 
             optimizer.zero_grad()
             loss.backward()
@@ -46,18 +50,29 @@ def train(data_folder, save_path):
         time_left = (1.0 * time_per_epoch) * (nr_epochs - 1 - epoch)
         print("Epoch %5d\t[Train]\tloss: %.6f \tETA: +%fs" % (
             epoch + 1, total_loss, time_left))
+        
+        # Calculate losses for train and validation
         loss_per_epoch[epoch] = total_loss
+        for valid_batch_idx, valid_batch in enumerate(test_loader):
+            valid_batch_in, valid_batch_gt = valid_batch[0].to(gpu), valid_batch[1].to(gpu)
 
+            valid_batch_out = infer_action(valid_batch_in)
+            loss = mae(valid_batch_out, valid_batch_gt)
+            valid_loss[epoch] += loss
+        
+        print("\t\t Test loss: ", valid_loss[epoch])
+        
     torch.save(infer_action, save_path)
     
     # Plot loss
     fig, ax = plt.subplots()
-    ax.plot(range(nr_epochs), loss_per_epoch)
-    plt.savefig('./output/run01.png')
+    ax.plot(range(nr_epochs), loss_per_epoch, color='r')
+    ax.plot(range(nr_epochs), valid_loss, color='g')
+    plt.savefig('./output/dagger01.png')
     plt.show()
 
 
-def cross_entropy_loss(batch_out, batch_gt):
+def mae(batch_out, batch_gt):
     """
     Calculates the cross entropy loss between the prediction of the network and
     the ground truth class for one batch.
@@ -66,8 +81,7 @@ def cross_entropy_loss(batch_out, batch_gt):
     batch_gt:       torch.Tensor of size (batch_size, C) True values
     return          float
     """
-    loss = -torch.mul(batch_gt, torch.log(batch_out + 0.01))
-    loss = loss.sum()
+    loss = torch.sum(torch.abs(batch_out - batch_gt))
     return loss
 
 

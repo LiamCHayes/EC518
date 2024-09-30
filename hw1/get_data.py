@@ -59,15 +59,15 @@ cam_bp = None
 cam_bp = world.get_blueprint_library().find('sensor.camera.rgb')
 cam_bp.set_attribute('image_size_x',str(320))
 cam_bp.set_attribute('image_size_y',str(240))
-cam_bp.set_attribute('fov',str(105))
-cam_location = carla.Location(2,0,3) # On the front hood
+cam_bp.set_attribute('fov',str(90))
+cam_location = carla.Location(0,0,2) # On the front hood
 cam_rotation = carla.Rotation(0,0,0) # Facing forward
 cam_transform = carla.Transform(cam_location, cam_rotation)
 ego_cam = world.spawn_actor(cam_bp, 
         cam_transform, 
         attach_to=ego_vehicle, 
         attachment_type=carla.AttachmentType.Rigid)
-ego_cam.listen(lambda image: image.save_to_disk(f'output/{args.label}/rgb_%.6d.jpg' % image.frame))
+ego_cam.listen(lambda image: image.save_to_disk(f'output/{args.label}/%.6d.jpg' % image.frame))
 
 ################
 # Start recoding
